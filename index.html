@@ -1733,7 +1733,7 @@ async function loadFinanceHistory() {
       container.innerHTML = reversed.map(r => `
         <div style="border-bottom:1px solid var(--leaf-dim); padding:10px 0;">
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-weight:700; font-size:14px;">${r.datum || ''}</span>
+            <span style="font-weight:700; font-size:14px;">${r.datum ? new Date(r.datum).toLocaleDateString('en-ZA', {day:'2-digit',month:'short',year:'numeric'}) : ''}</span>
             <span style="font-weight:800; font-size:15px; color:var(--leaf);">${fmtR(r.totaal || 0)}</span>
           </div>
           <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; margin-top:6px;">
