@@ -602,6 +602,7 @@ document.querySelectorAll('nav.tabs button').forEach(btn => {
       poFillSupplierDatalist();
     }
     if (btn.dataset.view === 'finance') {
+      loadFinanceHistory();
     }
   });
 });
@@ -1701,6 +1702,61 @@ document.getElementById('updatePriceBtn').addEventListener('click', async () => 
     btn.textContent = 'Save New Price';
   }
 });
+
+// ---------- FINANCE HISTORY ----------
+async function loadFinanceHistory() {
+  const loading = document.getElementById('finGeskiedenisLoading');
+  const container = document.getElementById('finGeskiedenis');
+  const blikkieEl = document.getElementById('finBlikkieTotaal');
+
+  loading.style.display = 'block';
+  container.innerHTML = '';
+
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=getFinanceData');
+    const json = await res.json();
+    if (json.status !== 'ok') throw new Error(json.message || 'Kon nie geskiedenis laai nie');
+
+    const rows = json.data || [];
+
+    if (rows.length > 0) {
+      const lastRow = rows[rows.length - 1];
+      if (lastRow.blikkieKumulatief != null && lastRow.blikkieKumulatief !== '') {
+        blikkieEl.textContent = fmtR(lastRow.blikkieKumulatief);
+      }
+    }
+
+    if (rows.length === 0) {
+      container.innerHTML = '<div style="text-align:center; color:var(--muted); font-size:13px; padding:10px;">Geen geskiedenis beskikbaar nie.</div>';
+    } else {
+      const reversed = [...rows].reverse();
+      container.innerHTML = reversed.map(r => `
+        <div style="border-bottom:1px solid var(--leaf-dim); padding:10px 0;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:700; font-size:14px;">${r.datum || ''}</span>
+            <span style="font-weight:800; font-size:15px; color:var(--leaf);">${fmtR(r.totaal || 0)}</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; margin-top:6px;">
+            <div style="font-size:11px; color:var(--muted);">💵 Kontant<br><span style="font-weight:700; color:var(--cream);">${fmtR(r.kasOntvang || 0)}</span></div>
+            <div style="font-size:11px; color:var(--muted);">💳 Kaart<br><span style="font-weight:700; color:var(--cream);">${fmtR(r.kaart || 0)}</span></div>
+            <div style="font-size:11px; color:var(--muted);">💰 Blikkie<br><span style="font-weight:700; color:#2E7D4F;">${fmtR(r.blikkie || 0)}</span></div>
+            <div style="font-size:11px; color:var(--muted);">🏪 Voorraad<br><span style="font-weight:700; color:var(--cream);">${fmtR(r.voorraad || 0)}</span></div>
+            <div style="font-size:11px; color:var(--muted);">🚨 Onvoorsien<br><span style="font-weight:700; color:var(--cream);">${fmtR(r.onvoorsien || 0)}</span></div>
+            <div style="font-size:11px; color:var(--muted);">👷 Xavier<br><span style="font-weight:700; color:var(--cream);">${fmtR(r.xavier || 0)}</span></div>
+          </div>
+          ${r.notes ? `<div style="font-size:11px; color:var(--muted); margin-top:4px;">📝 ${r.notes}</div>` : ''}
+        </div>
+      `).join('');
+    }
+  } catch (err) {
+    container.innerHTML = '<div style="color:var(--reorder); font-size:13px; padding:10px;">❌ Fout: ' + err.message + '</div>';
+    showToast('Kon nie geskiedenis laai nie: ' + err.message, true);
+  } finally {
+    loading.style.display = 'none';
+  }
+}
+
+document.getElementById('finRefreshGeskiedenis').addEventListener('click', loadFinanceHistory);
 
 // ---------- Init ----------
 loadStock();
