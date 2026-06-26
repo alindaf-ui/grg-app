@@ -1777,11 +1777,42 @@ async function loadFinanceHistory() {
       }
     }
 
-    if (rows.length === 0) {
+    // Outomaties opening invul van gister se closing
+    if (rows.length > 0) {
+      const lastRow = rows[rows.length - 1];
+      const openingEl = document.getElementById('finOpening');
+      if (openingEl && (!openingEl.value || openingEl.value === '0')) {
+        openingEl.value = lastRow.closing || 0;
+        updateFinDagPreview();
+      }
+    }
+
+    // Voeg vandag by as dit nie al in rows is nie
+    const today = new Date().toLocaleDateString('en-ZA', {day:'2-digit', month:'short', year:'numeric'});
+    const todayOpening = document.getElementById('finOpening').value || 0;
+    const todayInRows = rows.some(r => {
+      const d = r.datum ? new Date(r.datum).toLocaleDateString('en-ZA', {day:'2-digit', month:'short', year:'numeric'}) : '';
+      return d === today;
+    });
+
+    let todayRow = '';
+    if (!todayInRows && todayOpening > 0) {
+      todayRow = `
+        <div style="border-bottom:1px solid var(--leaf-dim); padding:10px 0; opacity:0.7;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:700; font-size:14px;">${today} <span style="font-size:11px; color:var(--muted);">(oop)</span></span>
+            <span style="font-weight:800; font-size:15px; color:var(--muted);">Nog nie afgesluit</span>
+          </div>
+          <div style="font-size:12px; color:var(--muted); margin-top:3px;">🏦 Opening: <span style="font-weight:700; color:var(--cream);">${fmtR(parseFloat(todayOpening))}</span></div>
+        </div>
+      `;
+    }
+
+    if (rows.length === 0 && !todayRow) {
       container.innerHTML = '<div style="text-align:center; color:var(--muted); font-size:13px; padding:10px;">Geen geskiedenis beskikbaar nie.</div>';
     } else {
       const reversed = [...rows].reverse();
-      container.innerHTML = reversed.map(r => `
+      container.innerHTML = todayRow + reversed.map(r => `
         <div style="border-bottom:1px solid var(--leaf-dim); padding:10px 0;">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <span style="font-weight:700; font-size:14px;">${r.datum ? new Date(r.datum).toLocaleDateString('en-ZA', {day:'2-digit',month:'short',year:'numeric'}) : ''}</span>
