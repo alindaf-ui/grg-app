@@ -1717,6 +1717,43 @@ document.getElementById('updatePriceBtn').addEventListener('click', async () => 
   }
 });
 
+// ---------- FINANCE DAG PREVIEW ----------
+function updateFinDagPreview() {
+  const opening = parseFloat(document.getElementById('finOpening').value) || 0;
+  const closing = parseFloat(document.getElementById('finKontant').value) || 0;
+  const kaart = parseFloat(document.getElementById('finKaart').value) || 0;
+  const kontant = closing - opening;
+  const totaal = kontant + kaart;
+
+  document.getElementById('finPrevKontant').textContent = fmtR(kontant);
+  document.getElementById('finPrevKaart').textContent = fmtR(kaart);
+  document.getElementById('finPrevTotaal').textContent = fmtR(totaal);
+
+  if (totaal > 0) {
+    document.getElementById('finDagPreview').style.display = 'block';
+    document.getElementById('finBucketPreview').style.display = 'block';
+
+    const day = new Date().getDay(); // 0=Sun,1=Mon,...,5=Fri
+    let remainder = totaal;
+    let blikkie = 0;
+    let xavier = 0;
+
+    if (day === 5) { blikkie = Math.min(2000, remainder); remainder -= blikkie; }
+    if (day === 1) { xavier = Math.min(1000, remainder); remainder -= xavier; }
+
+    const voorraad = Math.round(remainder * 0.7 * 100) / 100;
+    const onvoorsien = Math.round(remainder * 0.3 * 100) / 100;
+
+    document.getElementById('finPrevBlikkie').textContent = fmtR(blikkie);
+    document.getElementById('finPrevXavier').textContent = fmtR(xavier);
+    document.getElementById('finPrevVoorraad').textContent = fmtR(voorraad);
+    document.getElementById('finPrevOnvoorsien').textContent = fmtR(onvoorsien);
+  } else {
+    document.getElementById('finDagPreview').style.display = 'none';
+    document.getElementById('finBucketPreview').style.display = 'none';
+  }
+}
+
 // ---------- FINANCE HISTORY ----------
 async function loadFinanceHistory() {
   const loading = document.getElementById('finGeskiedenisLoading');
