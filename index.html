@@ -1635,14 +1635,18 @@ document.getElementById('cashCountClose').addEventListener('click', () => {
 document.getElementById('cashCountUse').addEventListener('click', () => {
   let total = 0;
   document.querySelectorAll('#cashCountRows input').forEach(input => {
-    total += (parseFloat(input.value) || 0) * parseFloat(input.dataset.val);
+    const qty = parseFloat(input.value) || 0;
+    const val = parseFloat(input.dataset.val) || 0;
+    total += qty * val;
   });
+  total = Math.round(total * 100) / 100;
   if (cashCountTarget === 'opening') {
     document.getElementById('finOpening').value = total;
+    updateFinDagPreview();
   } else {
     document.getElementById('finKontant').value = total;
+    updateFinDagPreview();
   }
-  updateFinDagPreview();
   document.getElementById('cashCountModal').style.display = 'none';
   showToast('Cash counted: ' + fmtR(total));
 });
