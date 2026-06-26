@@ -1618,6 +1618,16 @@ function updateCashCountTotal() {
   document.getElementById('cashCountTotal').textContent = fmtR(total);
 }
 
+document.getElementById('finCountOpenBtn').addEventListener('click', () => {
+  cashCountTarget = 'opening';
+  openCashCountModal();
+});
+
+document.getElementById('finCountBtn').addEventListener('click', () => {
+  cashCountTarget = 'closing';
+  openCashCountModal();
+});
+
 document.getElementById('cashCountClose').addEventListener('click', () => {
   document.getElementById('cashCountModal').style.display = 'none';
 });
