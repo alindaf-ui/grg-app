@@ -1787,6 +1787,7 @@ async function loadFinanceHistory() {
             <span style="font-weight:700; font-size:14px;">${r.datum ? new Date(r.datum).toLocaleDateString('en-ZA', {day:'2-digit',month:'short',year:'numeric'}) : ''}</span>
             <span style="font-weight:800; font-size:15px; color:var(--leaf);">${fmtR(r.totaal || 0)}</span>
           </div>
+          <div style="font-size:12px; color:var(--muted); margin-top:3px;">🏦 Opening: <span style="font-weight:700; color:var(--cream);">${fmtR(r.opening || 0)}</span> &nbsp;→&nbsp; Closing: <span style="font-weight:700; color:var(--cream);">${fmtR(r.closing || 0)}</span></div>
           <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; margin-top:6px;">
             <div style="font-size:14px; color:var(--muted);">💵 Kontant<br><span style="font-weight:700; font-size:15px; color:var(--cream);">${fmtR(r.kontant || 0)}</span></div>
             <div style="font-size:14px; color:var(--muted);">💳 Kaart<br><span style="font-weight:700; font-size:15px; color:var(--cream);">${fmtR(r.kaart || 0)}</span></div>
