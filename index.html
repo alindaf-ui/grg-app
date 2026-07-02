@@ -1887,9 +1887,12 @@ document.getElementById('finSaveDay').addEventListener('click', async () => {
     showToast('Besig om te stoor...');
     const res = await fetch(SCRIPT_URL + '?action=logFinanceDay', {
       method: 'POST',
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(payload)
     });
-    const json = await res.json();
+    const text = await res.text();
+    let json;
+    try { json = JSON.parse(text); } catch(e) { throw new Error('Ongeldige respons: ' + text.substring(0,100)); }
     if (json.status === 'ok') {
       showToast('✅ Dag gestoor!');
       loadFinanceHistory();
