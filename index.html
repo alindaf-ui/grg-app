@@ -1865,7 +1865,6 @@ document.getElementById('finSaveDay').addEventListener('click', async () => {
     showToast('Besig om te stoor...');
     const res = await fetch(SCRIPT_URL + '?action=logFinanceDay', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(payload)
     });
     const text = await res.text();
