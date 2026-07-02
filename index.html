@@ -1838,28 +1838,28 @@ async function loadFinanceHistory() {
 document.getElementById('finRefreshGeskiedenis').addEventListener('click', loadFinanceHistory);
 
 document.getElementById('finSaveDay').addEventListener('click', async () => {
-  const opening = parseFloat(document.getElementById('finOpening').value) || 0;
-  const closing = parseFloat(document.getElementById('finKontant').value) || 0;
-  const kaart = parseFloat(document.getElementById('finKaart').value) || 0;
-  const notes = document.getElementById('finNotes') ? document.getElementById('finNotes').value : '';
-  const selectedDatum = document.getElementById('finDatum') ? document.getElementById('finDatum').value : '';
-  const datumToUse = selectedDatum || new Date().toISOString().split('T')[0];
-
-  const kontant = closing - opening;
-  const totaal = kontant + kaart;
-
-  const dayToUse = selectedDatum ? new Date(selectedDatum + 'T12:00:00').getDay() : new Date().getDay();
-  let remainder = totaal; let blikkie = 0; let xavier = 0;
-  if (dayToUse === 5) { blikkie = Math.min(2000, remainder); remainder -= blikkie; }
-  if (dayToUse === 1) { xavier = Math.min(1000, remainder); remainder -= xavier; }
-  const voorraad = Math.round(remainder * 0.7 * 100) / 100;
-  const onvoorsien = Math.round(remainder * 0.3 * 100) / 100;
-
-  const payload = {
-    opening, closing, kontant, kaart, totaal,
-    blikkie, xavier, voorraad, onvoorsien, notes,
-    datum: datumToUse
-  };
+  try {
+    const opening = parseFloat(document.getElementById('finOpening').value) || 0;
+    const closing = parseFloat(document.getElementById('finKontant').value) || 0;
+    const kaart = parseFloat(document.getElementById('finKaart').value) || 0;
+    const notesEl = document.getElementById('finNotes');
+    const notes = notesEl ? notesEl.value : '';
+    const datumEl = document.getElementById('finDatum');
+    const selectedDatum = datumEl ? datumEl.value : '';
+    const datumToUse = selectedDatum || new Date().toISOString().split('T')[0];
+    const kontant = closing - opening;
+    const totaal = kontant + kaart;
+    const dayToUse = selectedDatum ? new Date(selectedDatum + 'T12:00:00').getDay() : new Date().getDay();
+    let remainder = totaal; let blikkie = 0; let xavier = 0;
+    if (dayToUse === 5) { blikkie = Math.min(2000, remainder); remainder -= blikkie; }
+    if (dayToUse === 1) { xavier = Math.min(1000, remainder); remainder -= xavier; }
+    const voorraad = Math.round(remainder * 0.7 * 100) / 100;
+    const onvoorsien = Math.round(remainder * 0.3 * 100) / 100;
+    const payload = {
+      opening, closing, kontant, kaart, totaal,
+      blikkie, xavier, voorraad, onvoorsien, notes,
+      datum: datumToUse
+    };
 
   try {
     showToast('Besig om te stoor...');
