@@ -398,18 +398,12 @@
       <!-- Cash -->
       <div class="field">
         <label>💵 Opening Balance Cash (R)</label>
-        <div style="display:flex; gap:8px;">
-          <input type="number" id="finOpening" inputmode="decimal" placeholder="0" style="flex:1; font-size:18px; font-weight:700;" oninput="updateFinDagPreview()">
-          <button class="btn btn-secondary" id="finCountOpenBtn" style="padding:0 12px; font-size:12px; white-space:nowrap;">Count</button>
-        </div>
+        <input type="number" id="finOpening" inputmode="decimal" placeholder="0" style="width:100%; font-size:18px; font-weight:700; padding:10px; border:1px solid var(--leaf-dim); border-radius:8px;" oninput="updateFinDagPreview()">
       </div>
 
       <div class="field" style="margin-top:10px;">
         <label>💵 Closing Balance Cash (R)</label>
-        <div style="display:flex; gap:8px;">
-          <input type="number" id="finKontant" inputmode="decimal" placeholder="0" style="flex:1; font-size:18px; font-weight:700;" oninput="updateFinDagPreview()">
-          <button class="btn btn-secondary" id="finCountBtn" style="padding:0 12px; font-size:12px; white-space:nowrap;">Count</button>
-        </div>
+        <input type="number" id="finKontant" inputmode="decimal" placeholder="0" style="width:100%; font-size:18px; font-weight:700; padding:10px; border:1px solid var(--leaf-dim); border-radius:8px;" oninput="updateFinDagPreview()">
       </div>
       
       <div id="finCashDiff" style="display:none; background:var(--surface-2); border-radius:8px; padding:8px 12px; margin-top:6px; font-size:13px;">
