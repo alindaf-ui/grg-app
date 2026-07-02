@@ -388,6 +388,11 @@
     <div class="card">
       <div style="font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">📝 Today's Closing</div>
 
+      <div class="field" style="margin-bottom:10px;">
+        <label>📅 Datum (kies dag)</label>
+        <input type="date" id="finDatum" style="width:100%; font-size:16px; font-weight:700; padding:10px; border:1px solid var(--leaf-dim); border-radius:8px; background:var(--surface); color:var(--cream);">
+      </div>
+
       <div id="finDatumLabel" style="font-size:13px; color:var(--muted); margin-bottom:10px; text-align:center;"></div>
 
       <!-- Cash -->
@@ -602,6 +607,11 @@ document.querySelectorAll('nav.tabs button').forEach(btn => {
       poFillSupplierDatalist();
     }
     if (btn.dataset.view === 'finance') {
+      const datumEl = document.getElementById('finDatum');
+      if (datumEl && !datumEl.value) {
+        const t = new Date();
+        datumEl.value = t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0');
+      }
       loadFinanceHistory();
     }
   });
@@ -1865,9 +1875,18 @@ document.getElementById('finSaveDay').addEventListener('click', async () => {
   const voorraad = Math.round(remainder * 0.7 * 100) / 100;
   const onvoorsien = Math.round(remainder * 0.3 * 100) / 100;
 
+  const selectedDatum = document.getElementById('finDatum') ? document.getElementById('finDatum').value : '';
+  const datumToUse = selectedDatum || new Date().toISOString().split('T')[0];
+  const dayToUse = selectedDatum ? new Date(selectedDatum + 'T12:00:00').getDay() : new Date().getDay();
+  let rem2 = totaal; let blik2 = 0; let xav2 = 0;
+  if (dayToUse === 5) { blik2 = Math.min(2000, rem2); rem2 -= blik2; }
+  if (dayToUse === 1) { xav2 = Math.min(1000, rem2); rem2 -= xav2; }
+  const voor2 = Math.round(rem2 * 0.7 * 100) / 100;
+  const onv2 = Math.round(rem2 * 0.3 * 100) / 100;
   const payload = {
     opening, closing, kontant, kaart, totaal,
-    blikkie, xavier, voorraad, onvoorsien, notes
+    blikkie: blik2, xavier: xav2, voorraad: voor2, onvoorsien: onv2, notes,
+    datum: datumToUse
   };
 
   try {
