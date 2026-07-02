@@ -1860,8 +1860,6 @@ document.getElementById('finSaveDay').addEventListener('click', async () => {
       blikkie, xavier, voorraad, onvoorsien, notes,
       datum: datumToUse
     };
-
-  try {
     showToast('Besig om te stoor...');
     const res = await fetch(SCRIPT_URL + '?action=logFinanceDay', {
       method: 'POST',
