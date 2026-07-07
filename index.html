@@ -266,7 +266,7 @@
         <button class="fast-mover-btn" data-search="Cannaba Gel">Cannaba Gel</button>
         <button class="fast-mover-btn" data-search="GRG-PRR">Pre Rolls</button>
         <button class="fast-mover-btn" data-search="Awaken etched disp">Etched Vapes</button>
-        <button class="fast-mover-btn" data-search="Awaken 3ml">3ml Disp</button>
+        <button class="fast-mover-btn" data-search="awaken 3ml|vap-01" data-label="3ml Disp">3ml Disp</button>
         <button class="fast-mover-btn" data-search="Traveler disp">Travelers</button>
         <button class="fast-mover-btn" data-search="Janes">Janes</button>
         <button class="fast-mover-btn" data-search="Green Lion">Green Lion</button>
@@ -848,11 +848,15 @@ document.getElementById('miscAddBtn').addEventListener('click', () => {
 });
 let lastInvoice = null;
 
-document.getElementById('productSearchInput').addEventListener('input', renderProductSearch);
+document.getElementById('productSearchInput').addEventListener('input', () => {
+  document.getElementById('productSearchInput').dataset.rawSearch = '';
+  renderProductSearch();
+});
 document.getElementById('productSearchInput').addEventListener('focus', renderProductSearch);
 
 function renderProductSearch() {
-  const term = document.getElementById('productSearchInput').value.trim().toLowerCase();
+  const searchEl = document.getElementById('productSearchInput');
+  const term = (searchEl.dataset.rawSearch || searchEl.value.trim()).toLowerCase();
   const container = document.getElementById('productSearchResults');
 
   if (!term) {
@@ -861,9 +865,12 @@ function renderProductSearch() {
     return;
   }
 
-  const matches = stockData.filter(p =>
-    p.product.toLowerCase().includes(term) || p.sku.toLowerCase().includes(term)
-  ).slice(0, 20);
+  const terms = term.split('|').map(t => t.trim()).filter(Boolean);
+  const matches = stockData.filter(p => {
+    const name = p.product.toLowerCase();
+    const sku = p.sku.toLowerCase();
+    return terms.some(t => name.includes(t) || sku.includes(t));
+  }).slice(0, 20);
 
   container.className = 'search-results';
 
@@ -1650,8 +1657,9 @@ function updateCashCountTotal() {
 document.querySelectorAll('.fast-mover-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const searchInput = document.getElementById('productSearchInput');
-    searchInput.value = btn.dataset.search;
-    searchInput.dispatchEvent(new Event('input'));
+    searchInput.value = btn.dataset.label || btn.dataset.search;
+    searchInput.dataset.rawSearch = btn.dataset.search;
+    renderProductSearch();
     searchInput.focus();
   });
 });
