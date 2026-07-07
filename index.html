@@ -265,10 +265,10 @@
         <button class="fast-mover-btn" data-search="Pain Gel">Pain Gel</button>
         <button class="fast-mover-btn" data-search="Cannaba Gel">Cannaba Gel</button>
         <button class="fast-mover-btn" data-search="GRG-PRR">Pre Rolls</button>
-        <button class="fast-mover-btn" data-search="Awaken etched disp">Etched Vapes</button>
+        <button class="fast-mover-btn" data-search="awaken disp vape" data-label="Etched Vapes">Etched Vapes</button>
         <button class="fast-mover-btn" data-search="awaken 3ml|vap-01" data-label="3ml Disp">3ml Disp</button>
-        <button class="fast-mover-btn" data-search="Traveler disp">Travelers</button>
-        <button class="fast-mover-btn" data-search="Janes">Janes</button>
+        <button class="fast-mover-btn" data-search="traveler disp|berry tonic hybrid disposable vape" data-label="Travelers">Travelers</button>
+        <button class="fast-mover-btn" data-search="jane|grg-vap-001" data-label="Janes">Janes</button>
         <button class="fast-mover-btn" data-search="Green Lion">Green Lion</button>
       </div>
     </div>
@@ -865,11 +865,13 @@ function renderProductSearch() {
     return;
   }
 
-  const terms = term.split('|').map(t => t.trim()).filter(Boolean);
+  const orGroups = term.split('|').map(g => g.trim()).filter(Boolean);
   const matches = stockData.filter(p => {
-    const name = p.product.toLowerCase();
-    const sku = p.sku.toLowerCase();
-    return terms.some(t => name.includes(t) || sku.includes(t));
+    const hay = (p.product + ' ' + p.sku).toLowerCase();
+    return orGroups.some(group => {
+      const words = group.split(/\s+/).filter(Boolean);
+      return words.every(w => hay.includes(w));
+    });
   }).slice(0, 20);
 
   container.className = 'search-results';
