@@ -407,6 +407,46 @@
       <div style="font-size:11px; color:rgba(255,255,255,0.7); margin-top:2px;">Kumulatief gespaar</div>
     </div>
 
+    <!-- Week Opsomming -->
+    <div class="card">
+      <div style="font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">📆 Hierdie Week</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+        <div style="background:var(--surface-2); border-radius:8px; padding:10px;">
+          <div style="font-size:11px; color:var(--muted);">Kontant</div>
+          <div id="finWeekKontant" style="font-size:16px; font-weight:700;">R0</div>
+        </div>
+        <div style="background:var(--surface-2); border-radius:8px; padding:10px;">
+          <div style="font-size:11px; color:var(--muted);">Kaart</div>
+          <div id="finWeekKaart" style="font-size:16px; font-weight:700;">R0</div>
+        </div>
+        <div style="background:var(--surface-2); border-radius:8px; padding:10px;">
+          <div style="font-size:11px; color:var(--muted);">Onvoorsien</div>
+          <div id="finWeekOnvoorsien" style="font-size:16px; font-weight:700;">R0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Maand Opsomming -->
+    <div class="card">
+      <div style="font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">🗓️ Hierdie Maand Sover</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+        <div style="background:var(--surface-2); border-radius:8px; padding:10px; border-top:3px solid #2E7D4F;">
+          <div style="font-size:11px; color:var(--muted);">Spaar</div>
+          <input type="number" id="finMonthSpaar" inputmode="decimal" style="width:100%; font-size:16px; font-weight:700; color:#2E7D4F; border:none; background:transparent; padding:2px 0;">
+        </div>
+        <div style="background:var(--surface-2); border-radius:8px; padding:10px; border-top:3px solid #FF9800;">
+          <div style="font-size:11px; color:var(--muted);">Onderhoud</div>
+          <input type="number" id="finMonthOnderhoud" inputmode="decimal" style="width:100%; font-size:16px; font-weight:700; color:#B8681E; border:none; background:transparent; padding:2px 0;">
+        </div>
+        <div style="background:var(--surface-2); border-radius:8px; padding:10px; border-top:3px solid #7B7FD4;">
+          <div style="font-size:11px; color:var(--muted);">Voorraad</div>
+          <input type="number" id="finMonthVoorraad" inputmode="decimal" style="width:100%; font-size:16px; font-weight:700; color:#4B4FAA; border:none; background:transparent; padding:2px 0;">
+        </div>
+      </div>
+      <button class="btn btn-secondary" id="finMonthSaveBtn" style="width:100%; margin-top:10px; font-size:12px;">💾 Stoor Aanpassings</button>
+      <div id="finMonthSaveStatus" style="display:none; text-align:center; margin-top:6px; font-size:12px;"></div>
+    </div>
+
     <!-- Vandag se Afsluiting -->
     <div class="card">
       <div style="font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">📝 Today's Closing</div>
@@ -1812,6 +1852,49 @@ async function loadFinanceHistory() {
 
     const rows = json.data || [];
 
+    // Week-opsomming (Maandag tot vandag, hierdie week)
+    const nowD = new Date();
+    const dayNum = nowD.getDay() === 0 ? 7 : nowD.getDay();
+    const mondayThisWeek = new Date(nowD);
+    mondayThisWeek.setDate(nowD.getDate() - (dayNum - 1));
+    mondayThisWeek.setHours(0,0,0,0);
+
+    let weekKontant = 0, weekKaart = 0, weekOnvoorsien = 0;
+    let monthSpaar = 0, monthOnderhoud = 0, monthVoorraad = 0;
+
+    rows.forEach(r => {
+      if (!r.datum) return;
+      const d = new Date(r.datum);
+      if (isNaN(d.getTime())) return;
+      if (d >= mondayThisWeek) {
+        weekKontant += parseFloat(r.kontant) || 0;
+        weekKaart += parseFloat(r.kaart) || 0;
+        weekOnvoorsien += parseFloat(r.onvoorsien) || 0;
+      }
+      if (d.getMonth() === nowD.getMonth() && d.getFullYear() === nowD.getFullYear()) {
+        monthSpaar += parseFloat(r.blikkie) || 0;
+        monthOnderhoud += parseFloat(r.onvoorsien) || 0;
+        monthVoorraad += parseFloat(r.voorraad) || 0;
+      }
+    });
+
+    document.getElementById('finWeekKontant').textContent = fmtR(weekKontant);
+    document.getElementById('finWeekKaart').textContent = fmtR(weekKaart);
+    document.getElementById('finWeekOnvoorsien').textContent = fmtR(weekOnvoorsien);
+
+    const monthKey = nowD.getFullYear() + '-' + String(nowD.getMonth() + 1).padStart(2, '0');
+    let override = null;
+    try {
+      const ovRes = await fetch(SCRIPT_URL + '?action=getMonthOverride&monthKey=' + monthKey);
+      const ovJson = await ovRes.json();
+      if (ovJson.status === 'ok' && ovJson.override) override = ovJson.override;
+    } catch (ovErr) { /* geen oorskrywing, gebruik berekende waarde */ }
+
+    document.getElementById('finMonthSpaar').value = override ? override.spaar : Math.round(monthSpaar * 100) / 100;
+    document.getElementById('finMonthOnderhoud').value = override ? override.onderhoud : Math.round(monthOnderhoud * 100) / 100;
+    document.getElementById('finMonthVoorraad').value = override ? override.voorraad : Math.round(monthVoorraad * 100) / 100;
+
+
     if (rows.length > 0) {
       const lastRow = rows[rows.length - 1];
       if (lastRow.blikkieKumulatief != null && lastRow.blikkieKumulatief !== '') {
@@ -1855,13 +1938,13 @@ async function loadFinanceHistory() {
     } else {
       const reversed = [...rows].reverse();
       container.innerHTML = todayRow + reversed.map(r => `
-        <div style="border-bottom:1px solid var(--leaf-dim); padding:10px 0;">
+        <div style="background:var(--surface-2); border-radius:12px; padding:12px 14px; margin-bottom:8px;">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <span style="font-weight:700; font-size:14px;">${r.datum ? new Date(r.datum).toLocaleDateString('en-ZA', {day:'2-digit',month:'short',year:'numeric'}) : ''}</span>
             <span style="font-weight:800; font-size:15px; color:var(--leaf);">${fmtR(r.totaal || 0)}</span>
           </div>
           <div style="font-size:12px; color:var(--muted); margin-top:3px;">🏦 Opening: <span style="font-weight:700; color:var(--cream);">${fmtR(r.opening || 0)}</span> &nbsp;→&nbsp; Closing: <span style="font-weight:700; color:var(--cream);">${fmtR(r.closing || 0)}</span></div>
-          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; margin-top:6px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:8px;">
             <div style="font-size:14px; color:var(--muted);">💵 Kontant<br><span style="font-weight:700; font-size:15px; color:var(--cream);">${fmtR(r.kontant || 0)}</span></div>
             <div style="font-size:14px; color:var(--muted);">💳 Kaart<br><span style="font-weight:700; font-size:15px; color:var(--cream);">${fmtR(r.kaart || 0)}</span></div>
             <div style="font-size:14px; color:var(--muted);">💰 Blikkie<br><span style="font-weight:700; font-size:15px; color:#2E7D4F;">${fmtR(r.blikkie || 0)}</span></div>
@@ -1882,6 +1965,35 @@ async function loadFinanceHistory() {
 }
 
 document.getElementById('finRefreshGeskiedenis').addEventListener('click', loadFinanceHistory);
+
+document.getElementById('finMonthSaveBtn').addEventListener('click', async () => {
+  const statusEl = document.getElementById('finMonthSaveStatus');
+  const nowD = new Date();
+  const monthKey = nowD.getFullYear() + '-' + String(nowD.getMonth() + 1).padStart(2, '0');
+  const spaar = parseFloat(document.getElementById('finMonthSpaar').value) || 0;
+  const onderhoud = parseFloat(document.getElementById('finMonthOnderhoud').value) || 0;
+  const voorraad = parseFloat(document.getElementById('finMonthVoorraad').value) || 0;
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'saveMonthOverride', monthKey, spaar, onderhoud, voorraad })
+    });
+    const json = await res.json();
+    statusEl.style.display = 'block';
+    if (json.status === 'ok') {
+      statusEl.style.color = 'var(--leaf)';
+      statusEl.textContent = '✅ Gestoor';
+    } else {
+      statusEl.style.color = 'var(--reorder)';
+      statusEl.textContent = '❌ ' + (json.message || 'Kon nie stoor nie');
+    }
+    setTimeout(() => { statusEl.style.display = 'none'; }, 2500);
+  } catch (err) {
+    statusEl.style.display = 'block';
+    statusEl.style.color = 'var(--reorder)';
+    statusEl.textContent = '❌ ' + err.message;
+  }
+});
 
 document.getElementById('finSaveDay').addEventListener('click', async () => {
   try {
