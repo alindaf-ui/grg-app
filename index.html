@@ -1884,8 +1884,9 @@ async function loadFinanceHistory() {
     document.getElementById('finMonthOnderhoud').value = override ? override.onderhoud : Math.round(monthOnderhoud * 100) / 100;
     document.getElementById('finMonthVoorraad').value = override ? override.voorraad : Math.round(monthVoorraad * 100) / 100;
 
-
-    if (rows.length > 0) {
+    if (override) {
+      blikkieEl.textContent = fmtR(override.spaar);
+    } else if (rows.length > 0) {
       const lastRow = rows[rows.length - 1];
       if (lastRow.blikkieKumulatief != null && lastRow.blikkieKumulatief !== '') {
         blikkieEl.textContent = fmtR(lastRow.blikkieKumulatief);
