@@ -712,10 +712,13 @@ function fmtPct(n) {
 
 function renderStockList() {
   const search = document.getElementById('searchInput').value.toLowerCase();
+  const orGroups = search.split('|').map(g => g.trim()).filter(Boolean);
   let items = stockData.filter(p => {
-    const matchesSearch = !search ||
-      p.product.toLowerCase().includes(search) ||
-      p.sku.toLowerCase().includes(search);
+    const hay = (p.product + ' ' + p.sku).toLowerCase();
+    const matchesSearch = orGroups.length === 0 || orGroups.some(group => {
+      const words = group.split(/\s+/).filter(Boolean);
+      return words.every(w => hay.includes(w));
+    });
     const matchesStatus = currentStatusFilter === 'ALL' || p.status === currentStatusFilter;
     const matchesSupplier = currentSupplierFilter === 'ALL' || p.supplier === currentSupplierFilter;
     return matchesSearch && matchesStatus && matchesSupplier;
