@@ -447,6 +447,37 @@
       <div id="finMonthSaveStatus" style="display:none; text-align:center; margin-top:6px; font-size:12px;"></div>
     </div>
 
+    <!-- Week Verdeling -->
+    <div class="card">
+      <div style="font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">📊 Week Verdeling (Saterdag)</div>
+      <div class="field">
+        <label>Bedrag in rekening</label>
+        <input type="number" id="weekVerdelingBedrag" inputmode="decimal" placeholder="0" style="width:100%; font-size:18px; font-weight:700; padding:10px; border:1px solid var(--leaf-dim); border-radius:8px;">
+      </div>
+      <button class="btn btn-primary" id="weekVerdelingBtn" style="width:100%; margin-top:10px;">Bereken Verdeling</button>
+      <div id="weekVerdelingResult" style="display:none; margin-top:12px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div style="background:var(--surface-2); border-radius:8px; padding:10px; border-top:3px solid #2E7D4F;">
+            <div style="font-size:10px; color:var(--muted);">💰 Blikkie</div>
+            <div id="weekVerdBlikkie" style="font-size:17px; font-weight:700; color:#2E7D4F;">R0</div>
+          </div>
+          <div style="background:var(--surface-2); border-radius:8px; padding:10px; border-top:3px solid #2196F3;">
+            <div style="font-size:10px; color:var(--muted);">👷 Xavier</div>
+            <div id="weekVerdXavier" style="font-size:17px; font-weight:700;">R0</div>
+          </div>
+          <div style="background:var(--surface-2); border-radius:8px; padding:10px; border-top:3px solid #7B7FD4;">
+            <div style="font-size:10px; color:var(--muted);">🏪 Voorraad (80%)</div>
+            <div id="weekVerdVoorraad" style="font-size:17px; font-weight:700;">R0</div>
+          </div>
+          <div style="background:var(--surface-2); border-radius:8px; padding:10px; border-top:3px solid #FF9800;">
+            <div style="font-size:10px; color:var(--muted);">🚨 Onderhoud (20%)</div>
+            <div id="weekVerdOnderhoud" style="font-size:17px; font-weight:700;">R0</div>
+          </div>
+        </div>
+        <div style="font-size:11px; color:var(--muted); margin-top:8px; text-align:center;">Tik hierdie bedrae self in die bucket-blokkies hierbo en klik Stoor.</div>
+      </div>
+    </div>
+
     <!-- Vandag se Afsluiting -->
     <div class="card">
       <div style="font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">📝 Today's Closing</div>
@@ -486,29 +517,6 @@
         <div class="totals-row"><span style="font-size:13px;">Cash</span><span id="finPrevKontant" style="font-weight:700;">R0</span></div>
         <div class="totals-row"><span style="font-size:13px;">Kaart</span><span id="finPrevKaart" style="font-weight:700;">R0</span></div>
         <div class="totals-row grand"><span>Day Total</span><span id="finPrevTotaal" style="color:var(--leaf); font-weight:700;">R0</span></div>
-      </div>
-
-      <!-- Bucket verdeling preview -->
-      <div id="finBucketPreview" style="display:none; margin-top:10px;">
-        <div style="font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:8px;">Today's Bucket Split:</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-          <div style="background:var(--surface-2); border-radius:8px; padding:10px; border-top:3px solid #4CAF50;">
-            <div style="font-size:10px; color:var(--muted);">💰 Blikkie</div>
-            <div id="finPrevBlikkie" style="font-size:17px; font-weight:700; color:#2E7D4F;">R0</div>
-          </div>
-          <div style="background:var(--surface-2); border-radius:8px; padding:10px; border-top:3px solid #2196F3;">
-            <div style="font-size:10px; color:var(--muted);">👷 Xavier</div>
-            <div id="finPrevXavier" style="font-size:17px; font-weight:700;">R0</div>
-          </div>
-          <div style="background:var(--surface-2); border-radius:8px; padding:10px; border-top:3px solid #FF9800;">
-            <div style="font-size:10px; color:var(--muted);">🏪 Stock</div>
-            <div id="finPrevVoorraad" style="font-size:17px; font-weight:700;">R0</div>
-          </div>
-          <div style="background:var(--surface-2); border-radius:8px; padding:10px; border-top:3px solid #F44336;">
-            <div style="font-size:10px; color:var(--muted);">🚨 Unexpected</div>
-            <div id="finPrevOnvoorsien" style="font-size:17px; font-weight:700;">R0</div>
-          </div>
-        </div>
       </div>
 
       <div class="field" style="margin-top:10px; margin-bottom:0;">
@@ -1813,26 +1821,8 @@ function updateFinDagPreview() {
 
   if (totaal > 0) {
     document.getElementById('finDagPreview').style.display = 'block';
-    document.getElementById('finBucketPreview').style.display = 'block';
-
-    const day = new Date().getDay(); // 0=Sun,1=Mon,...,5=Fri
-    let remainder = totaal;
-    let blikkie = 0;
-    let xavier = 0;
-
-    if (day === 5) { blikkie = Math.min(2000, remainder); remainder -= blikkie; }
-    if (day === 1) { xavier = Math.min(1000, remainder); remainder -= xavier; }
-
-    const voorraad = Math.round(remainder * 0.7 * 100) / 100;
-    const onvoorsien = Math.round(remainder * 0.3 * 100) / 100;
-
-    document.getElementById('finPrevBlikkie').textContent = fmtR(blikkie);
-    document.getElementById('finPrevXavier').textContent = fmtR(xavier);
-    document.getElementById('finPrevVoorraad').textContent = fmtR(voorraad);
-    document.getElementById('finPrevOnvoorsien').textContent = fmtR(onvoorsien);
   } else {
     document.getElementById('finDagPreview').style.display = 'none';
-    document.getElementById('finBucketPreview').style.display = 'none';
   }
 }
 
@@ -1965,6 +1955,23 @@ async function loadFinanceHistory() {
 }
 
 document.getElementById('finRefreshGeskiedenis').addEventListener('click', loadFinanceHistory);
+
+document.getElementById('weekVerdelingBtn').addEventListener('click', () => {
+  const bedrag = parseFloat(document.getElementById('weekVerdelingBedrag').value) || 0;
+  let remainder = bedrag;
+  const blikkie = Math.min(2000, remainder);
+  remainder -= blikkie;
+  const xavier = Math.min(1000, remainder);
+  remainder -= xavier;
+  const voorraad = Math.round(remainder * 0.8 * 100) / 100;
+  const onderhoud = Math.round(remainder * 0.2 * 100) / 100;
+
+  document.getElementById('weekVerdBlikkie').textContent = fmtR(blikkie);
+  document.getElementById('weekVerdXavier').textContent = fmtR(xavier);
+  document.getElementById('weekVerdVoorraad').textContent = fmtR(voorraad);
+  document.getElementById('weekVerdOnderhoud').textContent = fmtR(onderhoud);
+  document.getElementById('weekVerdelingResult').style.display = 'block';
+});
 
 document.getElementById('finMonthSaveBtn').addEventListener('click', async () => {
   const statusEl = document.getElementById('finMonthSaveStatus');
