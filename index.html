@@ -1827,6 +1827,8 @@ function updateFinDagPreview() {
 }
 
 // ---------- FINANCE HISTORY ----------
+let lastKnownMonthOverride = null;
+
 async function loadFinanceHistory() {
   const loading = document.getElementById('finGeskiedenisLoading');
   const container = document.getElementById('finGeskiedenis');
@@ -1880,12 +1882,15 @@ async function loadFinanceHistory() {
       if (ovJson.status === 'ok' && ovJson.override) override = ovJson.override;
     } catch (ovErr) { /* geen oorskrywing, gebruik berekende waarde */ }
 
-    document.getElementById('finMonthSpaar').value = override ? override.spaar : Math.round(monthSpaar * 100) / 100;
-    document.getElementById('finMonthOnderhoud').value = override ? override.onderhoud : Math.round(monthOnderhoud * 100) / 100;
-    document.getElementById('finMonthVoorraad').value = override ? override.voorraad : Math.round(monthVoorraad * 100) / 100;
+    document.getElementById('finMonthSpaar').value = override ? override.spaar : (lastKnownMonthOverride ? lastKnownMonthOverride.spaar : Math.round(monthSpaar * 100) / 100);
+    document.getElementById('finMonthOnderhoud').value = override ? override.onderhoud : (lastKnownMonthOverride ? lastKnownMonthOverride.onderhoud : Math.round(monthOnderhoud * 100) / 100);
+    document.getElementById('finMonthVoorraad').value = override ? override.voorraad : (lastKnownMonthOverride ? lastKnownMonthOverride.voorraad : Math.round(monthVoorraad * 100) / 100);
 
     if (override) {
+      lastKnownMonthOverride = override;
       blikkieEl.textContent = fmtR(override.spaar);
+    } else if (lastKnownMonthOverride) {
+      blikkieEl.textContent = fmtR(lastKnownMonthOverride.spaar);
     } else if (rows.length > 0) {
       const lastRow = rows[rows.length - 1];
       if (lastRow.blikkieKumulatief != null && lastRow.blikkieKumulatief !== '') {
