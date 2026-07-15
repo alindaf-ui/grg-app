@@ -916,6 +916,7 @@ function attachStockAdjustHandlers() {
       const newQty = Math.max(0, parseInt(input.value || '0', 10) || 0);
       saveBtn.disabled = true;
       saveBtn.textContent = 'Saving...';
+      const scrollY = window.scrollY;
       try {
         const res = await fetch(SCRIPT_URL + '?action=updateStock', {
           method: 'POST',
@@ -925,6 +926,7 @@ function attachStockAdjustHandlers() {
         if (json.status !== 'ok') throw new Error(json.message);
         showToast(sku + ' stock updated to ' + newQty);
         await loadStock();
+        requestAnimationFrame(() => window.scrollTo(0, scrollY));
       } catch (err) {
         showToast('Could not update stock: ' + err.message, true);
         saveBtn.disabled = false;
