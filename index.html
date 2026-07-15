@@ -335,20 +335,20 @@
     <div style="margin-bottom:12px;">
       <div style="font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">⭐ Gewilde Produkte</div>
       <div style="display:flex; flex-wrap:wrap; gap:6px;">
-        <button class="fast-mover-btn" onclick="poQuickAddGroup('Medical Drops', 'Medical Drops')">Medical Drops</button>
-        <button class="fast-mover-btn" onclick="poQuickAddGroup('Deep Rest', 'Deep Rest')">Deep Rest</button>
-        <button class="fast-mover-btn" onclick="poQuickAddGroup('grg-tin-005', 'Pain Drops')">Pain Drops</button>
-        <button class="fast-mover-btn" onclick="poQuickAddGroup('CBD Drops', 'CBD Drops')">CBD Drops</button>
-        <button class="fast-mover-btn" onclick="poQuickAddGroup('Medical Balm', 'Medical Balm')">Medical Balm</button>
-        <button class="fast-mover-btn" onclick="poQuickAddGroup('Pain Gel', 'Pain Gel')">Pain Gel</button>
-        <button class="fast-mover-btn" onclick="poQuickAddGroup('Cannaba Gel', 'Cannaba Gel')">Cannaba Gel</button>
-        <button class="fast-mover-btn" onclick="poQuickAddGroup('GRG-PRR', 'Pre Rolls')">Pre Rolls</button>
-        <button class="fast-mover-btn" onclick="poQuickAddGroup('awaken disp vape', 'Etched Vapes')">Etched Vapes</button>
-        <button class="fast-mover-btn" onclick="poQuickAddGroup('3ml jumbo', '3ml Disp')">3ml Disp</button>
-        <button class="fast-mover-btn" onclick="poQuickAddGroup('traveler disp|berry tonic hybrid disposable vape', 'Travelers')">Travelers</button>
-        <button class="fast-mover-btn" onclick="poQuickAddGroup('jane|grg-vap-001|grg-edi-020|grg-edi-022|grg-edi-012|grg-edi-013|grg-edi-026', 'Janes')">Janes</button>
-        <button class="fast-mover-btn" onclick="poQuickAddGroup('Green Lion', 'Green Lion')">Green Lion</button>
-        <button class="fast-mover-btn" onclick="poQuickAddGroup('lft-gum-006|lft-gum-009|lft-can-001|lft-can-002|lft-can-003|lft-can-004|lft-can-005|grg-edi-007|grg-edi-008|grg-edi-009|grg-edi-011|grg-edi-014|grg-edi-015|grg-edi-027|grg-edi-028|grg-edi-029|grg-edi-030|grg-edi-032|grg-edi-033|grg-edi-034|grg-edi-036|grg-edi-037', 'Lifted')">Lifted</button>
+        <button class="fast-mover-btn" onclick="poQuickShowGroup('Medical Drops', 'Medical Drops')">Medical Drops</button>
+        <button class="fast-mover-btn" onclick="poQuickShowGroup('Deep Rest', 'Deep Rest')">Deep Rest</button>
+        <button class="fast-mover-btn" onclick="poQuickShowGroup('grg-tin-005', 'Pain Drops')">Pain Drops</button>
+        <button class="fast-mover-btn" onclick="poQuickShowGroup('CBD Drops', 'CBD Drops')">CBD Drops</button>
+        <button class="fast-mover-btn" onclick="poQuickShowGroup('Medical Balm', 'Medical Balm')">Medical Balm</button>
+        <button class="fast-mover-btn" onclick="poQuickShowGroup('Pain Gel', 'Pain Gel')">Pain Gel</button>
+        <button class="fast-mover-btn" onclick="poQuickShowGroup('Cannaba Gel', 'Cannaba Gel')">Cannaba Gel</button>
+        <button class="fast-mover-btn" onclick="poQuickShowGroup('GRG-PRR', 'Pre Rolls')">Pre Rolls</button>
+        <button class="fast-mover-btn" onclick="poQuickShowGroup('awaken disp vape', 'Etched Vapes')">Etched Vapes</button>
+        <button class="fast-mover-btn" onclick="poQuickShowGroup('3ml jumbo', '3ml Disp')">3ml Disp</button>
+        <button class="fast-mover-btn" onclick="poQuickShowGroup('traveler disp|berry tonic hybrid disposable vape', 'Travelers')">Travelers</button>
+        <button class="fast-mover-btn" onclick="poQuickShowGroup('jane|grg-vap-001|grg-edi-020|grg-edi-022|grg-edi-012|grg-edi-013|grg-edi-026', 'Janes')">Janes</button>
+        <button class="fast-mover-btn" onclick="poQuickShowGroup('Green Lion', 'Green Lion')">Green Lion</button>
+        <button class="fast-mover-btn" onclick="poQuickShowGroup('lft-gum-006|lft-gum-009|lft-can-001|lft-can-002|lft-can-003|lft-can-004|lft-can-005|grg-edi-007|grg-edi-008|grg-edi-009|grg-edi-011|grg-edi-014|grg-edi-015|grg-edi-027|grg-edi-028|grg-edi-029|grg-edi-030|grg-edi-032|grg-edi-033|grg-edi-034|grg-edi-036|grg-edi-037', 'Lifted')">Lifted</button>
       </div>
     </div>
 
@@ -1385,7 +1385,7 @@ function poFilterProducts() {
   `).join('');
 }
 
-function poQuickAddGroup(searchStr, label) {
+function poQuickShowGroup(searchStr, label) {
   const orGroups = searchStr.toLowerCase().split('|').map(g => g.trim()).filter(Boolean);
   const matches = stockData.filter(p => {
     const hay = (p.product + ' ' + p.sku).toLowerCase();
@@ -1395,22 +1395,25 @@ function poQuickAddGroup(searchStr, label) {
     });
   });
 
+  const resultsEl = document.getElementById('poSearchResults');
+
   if (matches.length === 0) {
+    resultsEl.style.display = 'none';
     showToast('Geen produkte gevind vir ' + label, true);
     return;
   }
 
-  matches.forEach(p => {
-    const existing = poSelectedItems.find(i => i.sku === p.sku);
-    if (existing) {
-      existing.qty++;
-    } else {
-      poSelectedItems.push({ sku: p.sku, product: p.product, supplier: p.supplier, purchase: parseFloat(p.purchase) || 0, qty: 1, supplierName: '' });
-    }
-  });
-
-  poRenderSelected();
-  showToast(matches.length + ' produkte bygevoeg (' + label + ')');
+  document.getElementById('poSearch').value = label;
+  resultsEl.style.display = 'block';
+  resultsEl.innerHTML = matches.map(p => `
+    <div onclick="poAddItem('${p.sku}')" style="padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div style="font-weight:600; font-size:14px;">${p.product}</div>
+        <div style="font-size:11px; color:var(--muted);">${p.sku} · ${p.supplier}</div>
+      </div>
+      <div style="font-size:13px; font-weight:700; color:var(--leaf);">${fmtR(p.purchase || 0)}</div>
+    </div>
+  `).join('');
 }
 
 function poAddItem(sku) {
