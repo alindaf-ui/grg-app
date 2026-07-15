@@ -1516,29 +1516,17 @@ document.getElementById('generatePoBtn').addEventListener('click', () => {
   doc.text('PURCHASE ORDER — ' + today, 14, y);
   y += 12;
 
-  Object.entries(bySupplier).forEach(([supplier, items]) => {
-    doc.setFontSize(13);
-    doc.setTextColor(46, 125, 79);
-    doc.text(supplier, 14, y);
-    y += 7;
-
-    doc.setFontSize(10);
-    doc.setTextColor(0, 0, 0);
-    items.forEach(item => {
-      const displayName = (item.supplierName && item.supplierName.trim()) ? item.supplierName.trim() : item.product;
-      const line = `${item.qty}x  ${displayName}`;
-      const amt = fmtR(item.purchase * item.qty);
-      doc.text(line, 14, y);
-      doc.text(amt, 196, y, { align: 'right' });
-      y += 6;
-    });
-
-    const supplierTotal = items.reduce((s, i) => s + (i.purchase * i.qty), 0);
-    doc.setFontSize(11);
-    doc.setTextColor(46, 125, 79);
-    doc.text('Subtotal: ' + fmtR(supplierTotal), 196, y, { align: 'right' });
-    y += 10;
+  doc.setFontSize(10);
+  doc.setTextColor(0, 0, 0);
+  poSelectedItems.forEach(item => {
+    const displayName = (item.supplierName && item.supplierName.trim()) ? item.supplierName.trim() : item.product;
+    const line = `${item.qty}x  ${displayName}`;
+    const amt = fmtR(item.purchase * item.qty);
+    doc.text(line, 14, y);
+    doc.text(amt, 196, y, { align: 'right' });
+    y += 6;
   });
+  y += 6;
 
   const courierFee = poCourier ? (parseFloat(document.getElementById('poCourierFee').value) || 0) : 0;
   const grandTotal = poSelectedItems.reduce((s, i) => s + (i.purchase * i.qty), 0) + courierFee;
