@@ -241,6 +241,28 @@
     <div class="search-row">
       <input type="text" id="searchInput" placeholder="Search product or SKU...">
     </div>
+
+    <!-- Gewilde Produkte -->
+    <div style="margin-bottom:12px;">
+      <div style="font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">⭐ Gewilde Produkte</div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px;">
+        <button class="fast-mover-btn" onclick="stockQuickFilter('Medical Drops')">Medical Drops</button>
+        <button class="fast-mover-btn" onclick="stockQuickFilter('Deep Rest')">Deep Rest</button>
+        <button class="fast-mover-btn" onclick="stockQuickFilter('grg-tin-005')">Pain Drops</button>
+        <button class="fast-mover-btn" onclick="stockQuickFilter('CBD Drops')">CBD Drops</button>
+        <button class="fast-mover-btn" onclick="stockQuickFilter('Medical Balm')">Medical Balm</button>
+        <button class="fast-mover-btn" onclick="stockQuickFilter('Pain Gel')">Pain Gel</button>
+        <button class="fast-mover-btn" onclick="stockQuickFilter('Cannaba Gel')">Cannaba Gel</button>
+        <button class="fast-mover-btn" onclick="stockQuickFilter('GRG-PRR')">Pre Rolls</button>
+        <button class="fast-mover-btn" onclick="stockQuickFilter('awaken disp vape')">Etched Vapes</button>
+        <button class="fast-mover-btn" onclick="stockQuickFilter('3ml jumbo')">3ml Disp</button>
+        <button class="fast-mover-btn" onclick="stockQuickFilter('traveler disp|berry tonic hybrid disposable vape')">Travelers</button>
+        <button class="fast-mover-btn" onclick="stockQuickFilter('jane|grg-vap-001|grg-edi-020|grg-edi-022|grg-edi-012|grg-edi-013|grg-edi-026')">Janes</button>
+        <button class="fast-mover-btn" onclick="stockQuickFilter('Green Lion')">Green Lion</button>
+        <button class="fast-mover-btn" onclick="stockQuickFilter('lft-gum-006|lft-gum-009|lft-can-001|lft-can-002|lft-can-003|lft-can-004|lft-can-005|grg-edi-007|grg-edi-008|grg-edi-009|grg-edi-011|grg-edi-014|grg-edi-015|grg-edi-027|grg-edi-028|grg-edi-029|grg-edi-030|grg-edi-032|grg-edi-033|grg-edi-034|grg-edi-036|grg-edi-037')">Lifted</button>
+      </div>
+    </div>
+
     <div class="filter-row" id="supplierFilters"></div>
     <div class="filter-row" id="statusFilters">
       <div class="chip active" data-status="ALL">All</div>
@@ -750,6 +772,18 @@ async function loadStock() {
       '<div class="empty"><b>Could not load stock</b>Check your connection and try again.</div>';
     showToast('Error loading stock: ' + err.message, true);
   }
+}
+
+function stockQuickFilter(searchStr) {
+  document.getElementById('searchInput').value = searchStr;
+  currentStatusFilter = 'ALL';
+  currentSupplierFilter = 'ALL';
+  document.querySelectorAll('#statusFilters .chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('#statusFilters .chip[data-status="ALL"]').classList.add('active');
+  document.querySelectorAll('#supplierFilters .chip').forEach(c => c.classList.remove('active'));
+  const allSupplierChip = document.querySelector('#supplierFilters .chip[data-supplier="ALL"]');
+  if (allSupplierChip) allSupplierChip.classList.add('active');
+  renderStockList();
 }
 
 function renderStats() {
