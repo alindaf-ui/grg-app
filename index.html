@@ -263,6 +263,12 @@
       </div>
     </div>
 
+    <button class="btn btn-secondary" id="topSellersBtn" style="margin-bottom:12px;">📊 Top Sellers (laaste 30 dae)</button>
+    <div id="topSellersCard" class="card" style="display:none;">
+      <div style="font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">📊 Top Sellers — laaste 30 dae</div>
+      <div id="topSellersList"></div>
+    </div>
+
     <div class="filter-row" id="supplierFilters"></div>
     <div class="filter-row" id="statusFilters">
       <div class="chip active" data-status="ALL">All</div>
@@ -773,6 +779,53 @@ async function loadStock() {
     showToast('Error loading stock: ' + err.message, true);
   }
 }
+
+document.getElementById('topSellersBtn').addEventListener('click', async () => {
+  const card = document.getElementById('topSellersCard');
+  const listEl = document.getElementById('topSellersList');
+  const btn = document.getElementById('topSellersBtn');
+
+  if (card.style.display === 'block') {
+    card.style.display = 'none';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Laai...';
+  card.style.display = 'block';
+  listEl.innerHTML = '<div class="spinner"></div>';
+
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=getTopSellers&days=30');
+    const json = await res.json();
+    if (json.status !== 'ok') throw new Error(json.message || 'Kon nie Top Sellers laai nie');
+
+    const data = json.data || [];
+    if (data.length === 0) {
+      listEl.innerHTML = '<div class="empty"><b>Geen verkope in die laaste 30 dae nie</b></div>';
+    } else {
+      listEl.innerHTML = data.slice(0, 20).map((item, idx) => `
+        <div style="display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--leaf-dim);">
+          <div style="font-weight:800; color:var(--leaf); min-width:22px;">${idx + 1}</div>
+          <div style="flex:1;">
+            <div style="font-weight:700; font-size:14px;">${item.product}</div>
+            <div style="font-size:11.5px; color:var(--muted);">${item.supplier || ''} ${item.sku ? '· ' + item.sku : ''}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:800; font-size:15px;">${item.qty} verkoop</div>
+            <div style="font-size:11.5px; color:var(--muted);">${fmtR(item.revenue)}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+  } catch (err) {
+    listEl.innerHTML = '<div style="color:var(--reorder); font-size:13px; padding:10px;">❌ Fout: ' + err.message + '</div>';
+    showToast('Kon nie Top Sellers laai nie: ' + err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📊 Top Sellers (laaste 30 dae)';
+  }
+});
 
 function stockQuickFilter(searchStr) {
   document.getElementById('searchInput').value = searchStr;
