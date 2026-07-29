@@ -780,6 +780,60 @@ async function loadStock() {
   }
 }
 
+function attachTopSellerAdjustHandlers() {
+  document.querySelectorAll('#topSellersList .ts-row').forEach(row => {
+    const sku = row.dataset.sku;
+    const stockItem = stockData.find(p => p.sku === sku);
+    if (!stockItem) return;
+    const input = row.querySelector('.qty-input');
+    const saveBtn = row.querySelector('.save-btn');
+    const decBtn = row.querySelector('[data-action="dec"]');
+    const incBtn = row.querySelector('[data-action="inc"]');
+    if (!input || !saveBtn) return;
+
+    function refreshSaveVisibility() {
+      const changed = parseInt(input.value || '0', 10) !== stockItem.inStock;
+      saveBtn.classList.toggle('visible', changed);
+    }
+
+    decBtn.addEventListener('click', () => {
+      const v = Math.max(0, (parseInt(input.value || '0', 10) || 0) - 1);
+      input.value = v;
+      refreshSaveVisibility();
+    });
+    incBtn.addEventListener('click', () => {
+      const v = (parseInt(input.value || '0', 10) || 0) + 1;
+      input.value = v;
+      refreshSaveVisibility();
+    });
+    input.addEventListener('input', refreshSaveVisibility);
+
+    saveBtn.addEventListener('click', async () => {
+      const newQty = Math.max(0, parseInt(input.value || '0', 10) || 0);
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+      try {
+        const res = await fetch(SCRIPT_URL + '?action=updateStock', {
+          method: 'POST',
+          body: JSON.stringify({ action: 'updateStock', sku: sku, inStock: newQty })
+        });
+        const json = await res.json();
+        if (json.status !== 'ok') throw new Error(json.message);
+        showToast(sku + ' stock updated to ' + newQty);
+        stockItem.inStock = newQty;
+        saveBtn.classList.remove('visible');
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save';
+        loadStock();
+      } catch (err) {
+        showToast('Could not update stock: ' + err.message, true);
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save';
+      }
+    });
+  });
+}
+
 document.getElementById('topSellersBtn').addEventListener('click', async () => {
   const card = document.getElementById('topSellersCard');
   const listEl = document.getElementById('topSellersList');
@@ -804,19 +858,33 @@ document.getElementById('topSellersBtn').addEventListener('click', async () => {
     if (data.length === 0) {
       listEl.innerHTML = '<div class="empty"><b>Geen verkope in die laaste 30 dae nie</b></div>';
     } else {
-      listEl.innerHTML = data.slice(0, 20).map((item, idx) => `
-        <div style="display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--leaf-dim);">
-          <div style="font-weight:800; color:var(--leaf); min-width:22px;">${idx + 1}</div>
-          <div style="flex:1;">
-            <div style="font-weight:700; font-size:14px;">${item.product}</div>
-            <div style="font-size:11.5px; color:var(--muted);">${item.supplier || ''} ${item.sku ? '· ' + item.sku : ''}</div>
+      listEl.innerHTML = data.slice(0, 20).map((item, idx) => {
+        const stockItem = stockData.find(p => p.sku === item.sku);
+        const inStock = stockItem ? stockItem.inStock : null;
+        return `
+        <div class="ts-row" data-sku="${item.sku}" style="padding:9px 0; border-bottom:1px solid var(--leaf-dim);">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="font-weight:800; color:var(--leaf); min-width:22px;">${idx + 1}</div>
+            <div style="flex:1;">
+              <div style="font-weight:700; font-size:14px;">${item.product}</div>
+              <div style="font-size:11.5px; color:var(--muted);">${item.supplier || ''} ${item.sku ? '· ' + item.sku : ''}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:800; font-size:15px;">${item.qty} verkoop</div>
+              <div style="font-size:11.5px; color:var(--muted);">${fmtR(item.revenue)}</div>
+            </div>
           </div>
-          <div style="text-align:right;">
-            <div style="font-weight:800; font-size:15px;">${item.qty} verkoop</div>
-            <div style="font-size:11.5px; color:var(--muted);">${fmtR(item.revenue)}</div>
-          </div>
+          ${stockItem ? `
+          <div class="stock-adjust" style="justify-content:flex-end; margin-top:6px; padding-top:6px;">
+            <span style="font-size:11.5px; color:var(--muted); margin-right:auto;">Voorraad:</span>
+            <button class="step-btn" data-action="dec">&minus;</button>
+            <input type="number" class="qty-input" value="${inStock}" inputmode="numeric" min="0">
+            <button class="step-btn" data-action="inc">&plus;</button>
+            <button class="save-btn" data-action="save">Save</button>
+          </div>` : ''}
         </div>
-      `).join('');
+      `; }).join('');
+      attachTopSellerAdjustHandlers();
     }
   } catch (err) {
     listEl.innerHTML = '<div style="color:var(--reorder); font-size:13px; padding:10px;">❌ Fout: ' + err.message + '</div>';
