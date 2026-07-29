@@ -269,6 +269,8 @@
       <div id="topSellersList"></div>
     </div>
 
+    <button class="btn btn-primary" id="stockTakeOpenBtn" style="margin-bottom:12px;">🔢 Begin Stock Take</button>
+
     <div class="filter-row" id="supplierFilters"></div>
     <div class="filter-row" id="statusFilters">
       <div class="chip active" data-status="ALL">All</div>
@@ -278,6 +280,64 @@
     </div>
     <div id="stockList"></div>
   </section>
+
+  <!-- STOCK TAKE MODAL -->
+  <div id="stockTakeModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:300; overflow-y:auto;">
+    <div style="background:var(--surface); margin:16px auto; max-width:460px; border-radius:var(--radius); padding:18px; min-height:calc(100vh - 32px);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <span style="font-size:18px; font-weight:800; color:var(--leaf);">🔢 Stock Take</span>
+        <button id="stockTakeClose" style="background:none; border:none; font-size:24px; color:var(--muted); cursor:pointer;">×</button>
+      </div>
+
+      <!-- STEP 1: Choose group -->
+      <div id="stockTakeStepGroup">
+        <div style="font-size:13px; color:var(--muted); margin-bottom:12px;">Kies watter groep jy wil tel:</div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px;">
+          <button class="fast-mover-btn" onclick="stockTakeStart('', 'Alle Produkte')">Alle Produkte</button>
+          <button class="fast-mover-btn" onclick="stockTakeStart('Medical Drops', 'Medical Drops')">Medical Drops</button>
+          <button class="fast-mover-btn" onclick="stockTakeStart('Deep Rest', 'Deep Rest')">Deep Rest</button>
+          <button class="fast-mover-btn" onclick="stockTakeStart('CBD Drops', 'CBD Drops')">CBD Drops</button>
+          <button class="fast-mover-btn" onclick="stockTakeStart('Medical Balm', 'Medical Balm')">Medical Balm</button>
+          <button class="fast-mover-btn" onclick="stockTakeStart('Pain Gel', 'Pain Gel')">Pain Gel</button>
+          <button class="fast-mover-btn" onclick="stockTakeStart('Cannaba Gel', 'Cannaba Gel')">Cannaba Gel</button>
+          <button class="fast-mover-btn" onclick="stockTakeStart('GRG-PRR', 'Pre Rolls')">Pre Rolls</button>
+          <button class="fast-mover-btn" onclick="stockTakeStart('awaken disp vape', 'Etched Vapes')">Etched Vapes</button>
+          <button class="fast-mover-btn" onclick="stockTakeStart('3ml jumbo', '3ml Disp')">3ml Disp</button>
+          <button class="fast-mover-btn" onclick="stockTakeStart('Green Lion', 'Green Lion')">Green Lion</button>
+          <button class="fast-mover-btn" onclick="stockTakeStart('lft-gum-006|lft-gum-009|lft-can-001|lft-can-002|lft-can-003|lft-can-004|lft-can-005|grg-edi-007|grg-edi-008|grg-edi-009|grg-edi-011|grg-edi-014|grg-edi-015|grg-edi-027|grg-edi-028|grg-edi-029|grg-edi-030|grg-edi-032|grg-edi-033|grg-edi-034|grg-edi-036|grg-edi-037', 'Lifted')">Lifted</button>
+        </div>
+        <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">Of kies 'n verskaffer:</div>
+        <div id="stockTakeSupplierChips" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+      </div>
+
+      <!-- STEP 2: One product at a time -->
+      <div id="stockTakeStepCount" style="display:none;">
+        <div style="font-size:13px; color:var(--muted); text-align:center; margin-bottom:6px;" id="stockTakeProgress"></div>
+        <div style="background:var(--surface-2); border-radius:12px; padding:20px; text-align:center; margin-bottom:16px;">
+          <div class="sku-tag" id="stockTakeSku"></div>
+          <div style="font-size:20px; font-weight:800; margin:8px 0;" id="stockTakeProductName"></div>
+          <div style="font-size:13px; color:var(--muted); margin-bottom:14px;">Op Sheet: <span id="stockTakeRecorded" style="font-weight:700;"></span></div>
+          <div style="display:flex; align-items:center; justify-content:center; gap:14px;">
+            <button class="step-btn" id="stockTakeDec" style="width:46px; height:46px; font-size:26px;">&minus;</button>
+            <input type="number" id="stockTakeInput" inputmode="numeric" min="0" style="width:100px; text-align:center; font-size:30px; font-weight:800; padding:10px 4px;">
+            <button class="step-btn" id="stockTakeInc" style="width:46px; height:46px; font-size:26px;">&plus;</button>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secondary" id="stockTakePrevBtn" style="flex:1;">← Vorige</button>
+          <button class="btn btn-primary" id="stockTakeNextBtn" style="flex:1;">Volgende →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Summary -->
+      <div id="stockTakeStepSummary" style="display:none;">
+        <div style="font-size:15px; font-weight:700; margin-bottom:10px;">📋 Opsomming</div>
+        <div id="stockTakeSummaryList"></div>
+        <button class="btn btn-primary" id="stockTakeSaveAllBtn" style="margin-top:14px;">💾 Stoor Alle Veranderinge</button>
+        <div id="stockTakeSaveStatus" style="display:none; text-align:center; margin-top:8px; font-size:13px;"></div>
+      </div>
+    </div>
+  </div>
 
   <!-- LOG SALE VIEW (Invoice) -->
   <section class="view" id="view-sale">
@@ -2334,6 +2394,178 @@ document.getElementById('finSaveDay').addEventListener('click', async () => {
   } catch (err) {
     showToast('❌ Fout: ' + err.message, true);
   }
+});
+
+// ---------- STOCK TAKE MODE ----------
+let stockTakeQueue = [];
+let stockTakeIndex = 0;
+let stockTakeCounts = {}; // sku -> counted value
+
+document.getElementById('stockTakeOpenBtn').addEventListener('click', () => {
+  document.getElementById('stockTakeModal').style.display = 'block';
+  document.getElementById('stockTakeStepGroup').style.display = 'block';
+  document.getElementById('stockTakeStepCount').style.display = 'none';
+  document.getElementById('stockTakeStepSummary').style.display = 'none';
+
+  const suppliers = [...new Set(stockData.map(p => p.supplier).filter(Boolean))].sort();
+  const chipsEl = document.getElementById('stockTakeSupplierChips');
+  chipsEl.innerHTML = suppliers.map(s =>
+    `<button class="fast-mover-btn" onclick="stockTakeStartSupplier('${s.replace(/'/g, "\\'")}')">${s}</button>`
+  ).join('');
+});
+
+document.getElementById('stockTakeClose').addEventListener('click', () => {
+  document.getElementById('stockTakeModal').style.display = 'none';
+});
+
+function stockTakeStart(searchStr, label) {
+  let matches;
+  if (!searchStr) {
+    matches = stockData.slice();
+  } else {
+    const orGroups = searchStr.toLowerCase().split('|').map(g => g.trim()).filter(Boolean);
+    matches = stockData.filter(p => {
+      const hay = (p.product + ' ' + p.sku).toLowerCase();
+      return orGroups.some(group => {
+        const words = group.split(/\s+/).filter(Boolean);
+        return words.every(w => hay.includes(w));
+      });
+    });
+  }
+  stockTakeBegin(matches, label);
+}
+
+function stockTakeStartSupplier(supplier) {
+  const matches = stockData.filter(p => p.supplier === supplier);
+  stockTakeBegin(matches, supplier);
+}
+
+function stockTakeBegin(matches, label) {
+  if (matches.length === 0) {
+    showToast('Geen produkte gevind vir ' + label, true);
+    return;
+  }
+  stockTakeQueue = matches;
+  stockTakeIndex = 0;
+  stockTakeCounts = {};
+  document.getElementById('stockTakeStepGroup').style.display = 'none';
+  document.getElementById('stockTakeStepCount').style.display = 'block';
+  document.getElementById('stockTakeStepSummary').style.display = 'none';
+  stockTakeRenderCurrent();
+}
+
+function stockTakeRenderCurrent() {
+  const item = stockTakeQueue[stockTakeIndex];
+  document.getElementById('stockTakeProgress').textContent = (stockTakeIndex + 1) + ' van ' + stockTakeQueue.length;
+  document.getElementById('stockTakeSku').textContent = item.sku;
+  document.getElementById('stockTakeProductName').textContent = item.product;
+  document.getElementById('stockTakeRecorded').textContent = item.inStock;
+  const savedCount = stockTakeCounts[item.sku];
+  document.getElementById('stockTakeInput').value = savedCount !== undefined ? savedCount : item.inStock;
+  document.getElementById('stockTakePrevBtn').disabled = stockTakeIndex === 0;
+  document.getElementById('stockTakeNextBtn').textContent = (stockTakeIndex === stockTakeQueue.length - 1) ? 'Klaar ✓' : 'Volgende →';
+}
+
+function stockTakeSaveCurrentCount() {
+  const item = stockTakeQueue[stockTakeIndex];
+  const val = parseInt(document.getElementById('stockTakeInput').value || '0', 10) || 0;
+  stockTakeCounts[item.sku] = val;
+}
+
+document.getElementById('stockTakeDec').addEventListener('click', () => {
+  const input = document.getElementById('stockTakeInput');
+  input.value = Math.max(0, (parseInt(input.value || '0', 10) || 0) - 1);
+});
+document.getElementById('stockTakeInc').addEventListener('click', () => {
+  const input = document.getElementById('stockTakeInput');
+  input.value = (parseInt(input.value || '0', 10) || 0) + 1;
+});
+
+document.getElementById('stockTakePrevBtn').addEventListener('click', () => {
+  stockTakeSaveCurrentCount();
+  if (stockTakeIndex > 0) {
+    stockTakeIndex--;
+    stockTakeRenderCurrent();
+  }
+});
+
+document.getElementById('stockTakeNextBtn').addEventListener('click', () => {
+  stockTakeSaveCurrentCount();
+  if (stockTakeIndex < stockTakeQueue.length - 1) {
+    stockTakeIndex++;
+    stockTakeRenderCurrent();
+  } else {
+    stockTakeShowSummary();
+  }
+});
+
+function stockTakeShowSummary() {
+  document.getElementById('stockTakeStepCount').style.display = 'none';
+  document.getElementById('stockTakeStepSummary').style.display = 'block';
+
+  const diffs = stockTakeQueue
+    .map(item => ({ item, counted: stockTakeCounts[item.sku], diff: (stockTakeCounts[item.sku] !== undefined ? stockTakeCounts[item.sku] - item.inStock : 0) }))
+    .filter(d => d.counted !== undefined && d.diff !== 0);
+
+  const summaryEl = document.getElementById('stockTakeSummaryList');
+  if (diffs.length === 0) {
+    summaryEl.innerHTML = '<div class="empty"><b>Alles stem ooreen! ✅</b>Geen verskille gevind nie.</div>';
+    document.getElementById('stockTakeSaveAllBtn').style.display = 'none';
+  } else {
+    document.getElementById('stockTakeSaveAllBtn').style.display = 'block';
+    summaryEl.innerHTML = diffs.map(d => `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--leaf-dim);">
+        <div>
+          <div style="font-weight:700; font-size:13.5px;">${d.item.product}</div>
+          <div style="font-size:11.5px; color:var(--muted);">Sheet: ${d.item.inStock} → Getel: ${d.counted}</div>
+        </div>
+        <div style="font-weight:800; font-size:15px; color:${d.diff < 0 ? 'var(--reorder)' : 'var(--ok)'};">${d.diff > 0 ? '+' : ''}${d.diff}</div>
+      </div>
+    `).join('');
+  }
+}
+
+document.getElementById('stockTakeSaveAllBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('stockTakeSaveAllBtn');
+  const statusEl = document.getElementById('stockTakeSaveStatus');
+  btn.disabled = true;
+  btn.textContent = 'Stoor...';
+  statusEl.style.display = 'block';
+  statusEl.textContent = '';
+
+  const diffs = stockTakeQueue
+    .map(item => ({ item, counted: stockTakeCounts[item.sku] }))
+    .filter(d => d.counted !== undefined && d.counted !== d.item.inStock);
+
+  let savedCount = 0;
+  let failedSkus = [];
+
+  for (const d of diffs) {
+    try {
+      const res = await fetch(SCRIPT_URL + '?action=updateStock', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'updateStock', sku: d.item.sku, inStock: d.counted })
+      });
+      const json = await res.json();
+      if (json.status !== 'ok') throw new Error(json.message);
+      savedCount++;
+    } catch (err) {
+      failedSkus.push(d.item.sku);
+    }
+    statusEl.textContent = savedCount + ' van ' + diffs.length + ' gestoor...';
+  }
+
+  btn.disabled = false;
+  btn.textContent = '💾 Stoor Alle Veranderinge';
+  if (failedSkus.length === 0) {
+    statusEl.style.color = 'var(--leaf)';
+    statusEl.textContent = '✅ Alles gestoor (' + savedCount + ' produkte)';
+    showToast('Stock Take voltooi — ' + savedCount + ' produkte opgedateer');
+  } else {
+    statusEl.style.color = 'var(--reorder)';
+    statusEl.textContent = '⚠️ ' + savedCount + ' gestoor, ' + failedSkus.length + ' het gefaal: ' + failedSkus.join(', ');
+  }
+  await loadStock();
 });
 
 // ---------- Init ----------
