@@ -1016,7 +1016,10 @@ function stockTakeStart(searchStr,label){
   else{const orGroups=searchStr.toLowerCase().split('|').map(g=>g.trim()).filter(Boolean);matches=stockData.filter(p=>{const hay=(p.product+' '+p.sku).toLowerCase();return orGroups.some(group=>{const words=group.split(/\s+/).filter(Boolean);return words.every(w=>hay.includes(w));});});}
   stockTakeBegin(matches,label);
 }
-function stockTakeStartSupplier(supplier){stockTakeBegin(stockData.filter(p=>p.supplier===supplier),supplier);}
+function stockTakeStartSupplier(supplier){
+  var norm=function(s){return String(s||'').toLowerCase().replace(/[\u2018\u2019']/g,"'").trim();};
+  stockTakeBegin(stockData.filter(p=>norm(p.supplier)===norm(supplier)),supplier);
+}
 function stockTakeBegin(matches,label){
   if(!matches.length){showToast('Geen produkte vir '+label,true);return;}
   stockTakeQueue=matches;stockTakeIndex=0;stockTakeCounts={};
