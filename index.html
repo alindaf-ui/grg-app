@@ -1007,7 +1007,9 @@ document.getElementById('stockTakeOpenBtn').addEventListener('click',()=>{
   document.getElementById('stockTakeModal').style.display='block';
   document.getElementById('stockTakeStepGroup').style.display='block';document.getElementById('stockTakeStepCount').style.display='none';document.getElementById('stockTakeStepSummary').style.display='none';
   const suppliers=[...new Set(stockData.map(p=>p.supplier).filter(Boolean))].sort();
-  document.getElementById('stockTakeSupplierChips').innerHTML=suppliers.map(s=>`<button class="fast-mover-btn" onclick="stockTakeStartSupplier('${s.replace(/'/g,"\\'")}'">${s}</button>`).join('');
+  document.getElementById('stockTakeSupplierChips').innerHTML=suppliers.map(s=>{var btn=document.createElement('button');btn.className='fast-mover-btn';btn.textContent=s;btn.addEventListener('click',function(){stockTakeStartSupplier(s);});return btn.outerHTML;}).join('');
+  // Re-attach events after innerHTML set
+  document.getElementById('stockTakeSupplierChips').querySelectorAll('button').forEach(function(btn){btn.addEventListener('click',function(){stockTakeStartSupplier(btn.textContent);});});
 });
 document.getElementById('stockTakeClose').addEventListener('click',()=>{document.getElementById('stockTakeModal').style.display='none';});
 function stockTakeStart(searchStr,label){
